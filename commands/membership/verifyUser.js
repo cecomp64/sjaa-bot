@@ -1,4 +1,6 @@
+require('dotenv').config()
 const { SlashCommandBuilder, SlashCommandUserOption } = require('discord.js');
+const { google_auth, read_spreadsheet } = require('../../utils/google-apis');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -13,6 +15,20 @@ module.exports = {
     ),
   async execute(interaction) {
     // Implement the action here
-    await interaction.reply('Pong!')
+    //await interaction.reply('Pong!');
+
+    // Authenticate with google
+    const client = await google_auth();
+    const data = await read_spreadsheet(client, process.env.MEMBERSHIP_SHEET_ID);
+    const discord_index = data[0].findIndex ( value => value == process.env.MEMBERSHIP_SHEET_DISCORD_ID);
+    const results = data.slice(1).filter( row => row[discord_index] == interaction.user.id);
+
+    if(results.length == 0) {
+      await interaction.reply(`Discord user ${interaction.user.tag} is not a registered member of SJAA.`);
+    } else {
+      var return_string = '';
+      results.forEach(row => return_string = `${return_string}\n${row}`);
+      await interaction.reply(`Discord user ${interaction.user.tag} is registered as\n${return_string}`);
+    }
   }
 };
