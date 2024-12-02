@@ -1,4 +1,5 @@
 require('dotenv').config()
+const http = require('http');
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
@@ -24,5 +25,13 @@ for (const file of eventFiles) {
 	}
 }
 
-// Login and start listening for commands
+// Login to Discord and start listening for commands
 client.login(token);
+
+// Spawn a dummy server for Render free web service workaround.
+http.createServer((req, res) => {
+  res.writeHead(200);
+  res.end('Hello, world!\n');
+}).listen(3000);
+
+console.log('Dummy Server Started');
