@@ -52,6 +52,21 @@ module.exports = {
     console.log(`discord_index: ${discord_index}, id_index: ${id_index}, matching_row_index: ${matching_row_index}, email: ${email}`)
 
     if(matching_row_index >= 0) {
+      // Assign Members role to the user
+      var role = process.env.DISCORD_MEMBER_ROLE_ID;
+
+      try {
+        const member = interaction.member;
+        await member.roles.add(role);
+      } catch (error) {
+        console.log(`Could not assign role: ${error.message}`);
+        await interaction.reply({
+          content: `sjaa-bot has insufficient permissions to update roles`,
+          ephemeral: true,
+        });
+        return;
+      }
+
       // Compute which row needs to be replaced
       var values = [];
       var column = compute_column(discord_index);
