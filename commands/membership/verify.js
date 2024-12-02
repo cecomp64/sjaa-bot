@@ -12,11 +12,15 @@ module.exports = {
         .setName('user')
         .setDescription('The user to lookup.')
         .setRequired(true)
-        //.setRolePermissions([process.env.DISCORD_VERIFY_ROLE_ID]) // Only allow access to this command for specific roles
     ),
   async execute(interaction) {
-    // Implement the action here
-    //await interaction.reply('Pong!');
+    // Check that the user has the right role to issue this command
+    console.log(`roles: ${interaction.member.roles}`)
+    const role = interaction.member.roles.find(r => r == process.env.DISCORD_VERIFY_ROLE_ID)
+
+    if (!role) { 
+      return interaction.reply({ content: 'You do not have permissions to execute this command.', ephemeral: true }); 
+    }
 
     // Authenticate with google
     const client = await google_auth();
