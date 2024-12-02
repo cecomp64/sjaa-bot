@@ -1,6 +1,7 @@
 require('dotenv').config()
 const { SlashCommandBuilder, SlashCommandUserOption } = require('discord.js');
 const { google_auth, read_spreadsheet } = require('../../utils/google-apis');
+const { find_discord_user } = require('../../utils/helpers');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -19,16 +20,21 @@ module.exports = {
 
     // Authenticate with google
     const client = await google_auth();
-    const data = await read_spreadsheet(client, process.env.MEMBERSHIP_SHEET_ID);
-    const discord_index = data[0].findIndex ( value => value == process.env.MEMBERSHIP_SHEET_DISCORD_ID);
-    const results = data.slice(1).filter( row => row[discord_index] == interaction.user.id);
+    const data = await read_spreadsheet(client, process.env.MEMBERSHIP_SHEET_ID, process.env.MEMBERSHIP_SHEET_RANGE);
+    const results = find_discord_user(data, interaction.user.id);
 
     if(results.length == 0) {
-      await interaction.reply(`Discord user ${interaction.user.tag} is not a registered member of SJAA.`);
+      await interaction.reply({
+        content: `Discord user ${interaction.user.tag} is not a registered member of SJAA.`,
+        ephemeral: true,
+      });
     } else {
       var return_string = '';
       results.forEach(row => return_string = `${return_string}\n${row}`);
-      await interaction.reply(`Discord user ${interaction.user.tag} is registered as\n${return_string}`);
+      await interaction.reply({
+        content: `Discord user ${interaction.user.tag} is registered as\n${return_string}`,
+        ephemeral: true,
+      });
     }
   }
 };
